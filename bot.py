@@ -3,12 +3,15 @@ import fastapi_poe as fp
 from telegram import Update, constants, error
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 import logging
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 class GetUpdatesFilter(logging.Filter):
     def filter(self, record):
+        # return "api.telegram.org" not in record.getMessage()
         return "api.telegram.org" not in record.getMessage()
-    
+
 class CustomHandler(logging.Handler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,6 +34,7 @@ bot_names = {
 default_bot_name = bot_names['claude3']
 user_tasks = {}
 user_context = {}
+user_ids = os.environ["TELEGRAM_BOT_OWNER_ID"].split(',')
 
 async def get_responses(api_key, messages, response_list, done, bot_name):
     async for chunk in fp.get_bot_response(messages=messages, bot_name=bot_name, api_key=api_key):
@@ -80,6 +84,10 @@ async def handle_message(update: Update, context):
     user_input = update.message.text
     message = fp.ProtocolMessage(role="user", content=user_input)
 
+    if str(user_id) not in user_ids:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="你是黑户啊，快去py管理员添加吧。")
+        return
+
     # 获取用户上下文
     if user_id not in user_context:
         user_context[user_id] = {'messages': [message], 'bot_name': default_bot_name}
@@ -117,21 +125,31 @@ async def new_conversation(update: Update, context):
 
 async def gpt4(update: Update, context):
     user_id = update.effective_user.id
+    if str(user_id) not in user_ids:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="你是黑户啊，快去py管理员添加吧。")
+        return
     bot_name = bot_names['gpt4']
     await switch_model(user_id, bot_name, update, context)
 
 async def claude3(update: Update, context):
     user_id = update.effective_user.id
+    if str(user_id) not in user_ids:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="你是黑户啊，快去py管理员添加吧。")
+        return
     bot_name = bot_names['claude3']
     await switch_model(user_id, bot_name, update, context)
 
 async def switch_model(user_id, bot_name, update, context):
+    if str(user_id) not in user_ids:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="你是黑户啊，快去py管理员添加吧。")
+        return
     if user_id not in user_context or user_context[user_id]['bot_name'] != bot_name:
         user_context[user_id] = {'messages': [], 'bot_name': bot_name}
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"已切换到 {bot_name} 模型,并清空上下文。")
         await new_conversation(update, context)
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"当前已经是 {bot_name} 模型。")
+
 
 def main():
     application = Application.builder().token(os.environ["TELEGRAM_BOT_TOKEN"]).build()
@@ -150,6 +168,7 @@ def main():
 
     claude3_handler = CommandHandler('claude3', claude3)
     application.add_handler(claude3_handler)
+
 
     # 运行
     application.run_polling()
