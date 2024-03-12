@@ -21,7 +21,7 @@
 
 1. 克隆此仓库:
 ```bash
-git clone https://github.com/Timmy-web/Poe-Telegram-Chatbot.git
+git clone https://github.com/formzs/Poe-Telegram-Chatbot.git
 cd Poe-Telegram-Chatbot
 ```
 
@@ -33,6 +33,7 @@ pip install -r requirements.txt
 3. 设置环境变量:
 ```bash
 export TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+export TELEGRAM_BOT_OWNER_ID="telegram_id_01,telegram_id_02,telegram_id_03...."
 export POE_API_KEY="your_poe_api_key"
 ```
 
@@ -41,21 +42,28 @@ export POE_API_KEY="your_poe_api_key"
 python bot.py
 ```
 
-### Docker 运行
+### 自构建Docker 运行
+1. 克隆此仓库:
+```bash
+git clone https://github.com/formzs/Poe-Telegram-Chatbot.git
+cd Poe-Telegram-Chatbot
+```
 
-运行 Docker 容器:
+2. build镜像:
+```bash
+docker build -t poebot .
+```
+
+3. 运行 Docker 容器:
 ```bash
 docker run -d --name poebot \
   -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
   -e TELEGRAM_BOT_OWNER_ID="telegram_id_01,telegram_id_02,telegram_id_03...." \
   -e POE_API_KEY="your_poe_api_key" \
-  ghcr.io/timmy-web/poe-bot
+  poebot
 ```
-或者使用 docker-compose:
-```bash
-docker-compose up -d
-```
-注意将 your_telegram_bot_token 和 your_poe_api_key 替换为你自己的 Token 和 API 密钥。
+
+注意将 your_telegram_bot_token 和 your_poe_api_key 替换为你自己的 Token 和 API 密钥，TELEGRAM_BOT_OWNER_ID替换成允许使用bot的telegram用户id。
 
 ## 使用方法
 
