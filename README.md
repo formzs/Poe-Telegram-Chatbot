@@ -47,6 +47,7 @@ python bot.py
 ```bash
 docker run -d --name poebot \
   -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
+  -e TELEGRAM_BOT_OWNER_ID="telegram_id_01,telegram_id_02,telegram_id_03...." \
   -e POE_API_KEY="your_poe_api_key" \
   ghcr.io/timmy-web/poe-bot
 ```
